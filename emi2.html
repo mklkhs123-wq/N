@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finance & EMI Loan Calculator</title>
+<style>
+body{font-family:Arial;margin:0;padding:0;background:#f0f0f0;}
+header{background:#111;color:#fff;padding:10px;display:flex;align-items:center;}
+.hamburger{font-size:20px;cursor:pointer;margin-right:10px;}
+#sideMenu{width:200px;background:#333;color:#fff;position:fixed;top:0;left:-200px;height:100%;overflow:auto;transition:0.3s;padding-top:60px;}
+#sideMenu a{display:block;color:#fff;padding:10px;text-decoration:none;}
+#sideMenu a:hover{background:#575757;}
+.tab-content{margin-left:0;padding:20px;display:none;background:#fff;min-height:90vh;}
+.activeTab{display:block;}
+input, select{padding:10px;margin:5px 0;width:95%;font-size:16px;}
+button{padding:12px 20px;margin:5px 0;cursor:pointer;border-radius:8px;font-size:16px;}
+.collapsible{background:#111;color:#fff;padding:8px;border:none;width:100%;text-align:left;outline:none;font-size:16px;}
+.content{display:none;padding:10px;background:#e0e0e0;}
+table{width:100%;border-collapse:collapse;margin-top:10px;}
+table,th,td{border:1px solid #999;}
+th,td{padding:8px;text-align:center;}
+#homeGrid div:hover{background:#ccc;}
+#tenureButtons button{margin-right:5px;}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="hamburger" onclick="toggleMenu()">&#9776;</span>
+  <h2 style="margin:0;font-size:18px;">Finance & EMI Loan Calculator</h2>
+</header>
+
+<div id="sideMenu">
+  <a href="#" onclick="openTab('home')">Home</a>
+  <a href="#" onclick="openTab('emi')">EMI Calculator</a>
+  <a href="#" onclick="openTab('rd')">RD Calculator</a>
+  <a href="#" onclick="openTab('fd')">FD Calculator</a>
+  <a href="#" onclick="openTab('sip')">SIP Calculator</a>
+  <a href="#" onclick="openTab('ppf')">PPF Calculator</a>
+  <a href="#" onclick="openTab('gst')">GST Calculator</a>
+</div>
+
+<!-- Home Tab with Grid -->
+<div id="home" class="tab-content activeTab">
+  <h3>Welcome!</h3>
+  <p>Select a calculator from the menu or below:</p>
+  <div id="homeGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;"></div>
+</div>
+
+<!-- EMI Calculator (Unchanged) -->
+<div id="emi" class="tab-content">
+  <h3>Flat Interest EMI Calculator</h3>
+  <input type="number" id="productAmount" placeholder="Product Amount">
+  <input type="number" id="marginMoney" placeholder="Margin Money">
+  <input type="number" id="processPercent" placeholder="Processing Fee %">
+  <input type="number" id="stamp" placeholder="Stamp Charges">
+  <input type="number" id="extra" placeholder="Extra Charges">
+  <input type="number" id="owner" placeholder="Owner Contribution">
+  <input type="number" id="rate" placeholder="Interest Rate % per year">
+  <input type="number" id="tenure" placeholder="Tenure (months)">
+  <button onclick="calculateFlatEMI()">Calculate EMI</button>
+  <div id="emiResult"></div>
+  <button class="collapsible">Show Monthly Breakdown</button>
+  <div class="content" id="monthlyBreakdown"></div>
+</div>
+
+<!-- RD Calculator -->
+<div id="rd" class="tab-content">
+  <h3>Recurring Deposit Calculator</h3>
+  <input type="number" id="rdAmount" placeholder="Monthly Deposit">
+  <input type="number" id="rdRate" placeholder="Interest Rate % per year">
+  <input type="number" id="rdTenure" placeholder="Tenure (months)">
+  <button onclick="calculateRD()">Calculate RD</button>
+  <div id="rdResult"></div>
+  <button class="collapsible">Show Monthly Breakdown</button>
+  <div class="content" id="rdBreakdown"></div>
+</div>
+
+<!-- FD Calculator -->
+<div id="fd" class="tab-content">
+  <h3>Fixed Deposit Calculator</h3>
+  <input type="number" id="fdAmount" placeholder="Deposit Amount">
+  <input type="number" id="fdRate" placeholder="Interest Rate % per year">
+  <input type="number" id="fdTenure" placeholder="Tenure (months)">
+  <button onclick="calculateFD()">Calculate FD</button>
+  <div id="fdResult"></div>
+  <button class="collapsible">Show Monthly Breakdown</button>
+  <div class="content" id="fdBreakdown"></div>
+</div>
+
+<!-- SIP Calculator with Frequency -->
+<div id="sip" class="tab-content">
+  <h3>SIP Calculator</h3>
+  <input type="number" id="sipAmount" placeholder="Monthly Investment">
+  <input type="number" id="sipRate" placeholder="Interest Rate % per year">
+  <input type="number" id="sipTenure" placeholder="Tenure (months)">
+  <label for="sipFrequency">Frequency:</label>
+  <select id="sipFrequency">
+    <option value="1">Monthly</option>
+    <option value="3">Quarterly</option>
+  </select>
+  <button onclick="calculateSIP()">Calculate SIP</button>
+  <div id="sipResult"></div>
+  <button class="collapsible">Show Monthly Breakdown</button>
+  <div class="content" id="sipBreakdown"></div>
+</div>
+
+<!-- PPF Calculator with Partial Withdrawal -->
+<div id="ppf" class="tab-content">
+  <h3>PPF Calculator</h3>
+  <input type="number" id="ppfAmount" placeholder="Annual Contribution">
+  <input type="number" id="ppfRate" placeholder="Interest Rate % per year">
+  <input type="number" id="ppfTenure" placeholder="Tenure (years)">
+  <label><input type="checkbox" id="ppfPartial"/> Allow Partial Withdrawal</label>
+  <button onclick="calculatePPF()">Calculate PPF</button>
+  <div id="ppfResult"></div>
+  <button class="collapsible">Show Yearly Breakdown</button>
+  <div class="content" id="ppfBreakdown"></div>
+</div>
+
+<!-- GST Calculator with Slabs -->
+<div id="gst" class="tab-content">
+  <h3>GST Calculator</h3>
+  <input type="number" id="gstAmount" placeholder="Amount">
+  <label>GST Rate:</label>
+  <select id="gstRateSelect" onchange="document.getElementById('gstRate').value=this.value">
+    <option value="5">5%</option>
+    <option value="12">12%</option>
+    <option value="18" selected>18%</option>
+    <option value="28">28%</option>
+  </select>
+  <input type="hidden" id="gstRate"/>
+  <button onclick="calculateGST()">Calculate GST</button>
+  <div id="gstResult"></div>
+</div>
+
+<script>
+// Side menu toggle
+function toggleMenu(){
+  const menu=document.getElementById('sideMenu');
+  menu.style.left=(menu.style.left==='0px')?'-200px':'0px';
+}
+
+// Tab switch
+function openTab(tabName){
+  document.querySelectorAll('.tab-content').forEach(tab=>tab.classList.remove('activeTab'));
+  document.getElementById(tabName).classList.add('activeTab');
+  document.getElementById('sideMenu').style.left='-200px'; 
+  if(tabName==='home') populateHomeGrid();
+}
+
+// Collapsible
+document.querySelectorAll(".collapsible").forEach(btn=>{
+  btn.addEventListener("click", function(){
+    this.classList.toggle("activeCollapsible");
+    const content = this.nextElementSibling;
+    content.style.display = (content.style.display === "block") ? "none" : "block";
+  });
+});
+
+// Populate Home Grid
+function populateHomeGrid(){
+  const calculators = [
+    {id:'emi', name:'EMI Calculator'},
+    {id:'rd', name:'RD Calculator'},
+    {id:'fd', name:'FD Calculator'},
+    {id:'sip', name:'SIP Calculator'},
+    {id:'ppf', name:'PPF Calculator'},
+    {id:'gst', name:'GST Calculator'}
+  ];
+  const grid = document.getElementById('homeGrid');
+  grid.innerHTML = '';
+  calculators.forEach(calc => {
+    const div = document.createElement('div');
+    div.style.border = '1px solid #999';
+    div.style.padding = '10px';
+    div.style.textAlign = 'center';
+    div.style.background = '#e0e0e0';
+    div.style.cursor = 'pointer';
+    div.innerText = calc.name;
+    div.onclick = () => openTab(calc.id);
+    grid.appendChild(div);
+  });
+}
+document.addEventListener("DOMContentLoaded", function(){ populateHomeGrid(); });
+
+// EMI Calculator (unchanged)
+function calculateFlatEMI(){
+  const P = parseFloat(document.getElementById('productAmount').value);
+  const M = parseFloat(document.getElementById('marginMoney').value);
+  const proc = parseFloat(document.getElementById('processPercent').value);
+  const stamp = parseFloat(document.getElementById('stamp').value);
+  const extra = parseFloat(document.getElementById('extra').value);
+  const owner = parseFloat(document.getElementById('owner').value);
+  const rate = parseFloat(document.getElementById('rate').value)/100;
+  const months = parseInt(document.getElementById('tenure').value);
+  if(isNaN(P) || isNaN(M) || isNaN(proc) || isNaN(rate) || isNaN(months)){ alert('Fill required fields'); return; }
+
+  const remaining = P - M;
+  const downpayment = M + (remaining*proc/100) + stamp + extra + owner;
+  const interest = remaining * rate * (months/12);
+  const emi = (remaining + interest)/months;
+  const totalPayable = emi * months;
+  const totalInterest = totalPayable - remaining;
+
+  document.getElementById('emiResult').innerHTML=`
+    <p>EMI: ₹${emi.toFixed(2)}</p>
+    <p>Downpayment: ₹${downpayment.toFixed(2)}</p>
+    <p>Total Interest: ₹${totalInterest.toFixed(2)}</p>
+    <p>Total Payable: ₹${totalPayable.toFixed(2)}</p>
+  `;
+
+  let balance = remaining;
+  let table=`<table><tr><th>Month</th><th>EMI</th><th>Interest</th><th>Principal</th><th>Balance</th></tr>`;
+  for(let i=1;i<=months;i++){
+    const intMonth=interest/months;
+    const principal=emi-intMonth;
+    balance-=principal;
+    if(i===months) balance=0; 
+    table+=`<tr><td>${i}</td><td>₹${emi.toFixed(2)}</td><td>₹${intMonth.toFixed(2)}</td><td>₹${principal.toFixed(2)}</td><td>₹${balance.toFixed(2)}</td></tr>`;
+  }
+  table+=`</table>`;
+  document.getElementById('monthlyBreakdown').innerHTML=table;
+}
+
+// RD Calculator
+function calculateRD(){
+  const M=parseFloat(document.getElementById('rdAmount').value);
+  const rate=parseFloat(document.getElementById('rdRate').value)/100;
+  const months=parseInt(document.getElementById('rdTenure').value);
+  if(isNaN(M) || isNaN(rate) || isNaN(months)){ alert('Fill required fields'); return; }
+
+  let balance=0, table=`<table><tr><th>Month</th><th>Deposit</th><th>Interest</th><th>Balance</th></tr>`;
+  for(let i=1;i<=months;i++){
+    const interest=balance*rate/12;
+    balance+=M+interest;
+    table+=`<tr><td>${i}</td><td>₹${M.toFixed(2)}</td><td>₹${interest.toFixed(2)}</td><td>₹${balance.toFixed(2)}</td></tr>`;
+  }
+  table+=`</table>`;
+  document.getElementById('rdResult').innerHTML=`<p>RD Maturity: ₹${balance.toFixed(2)}</p>`;
+  document.getElementById('rdBreakdown').innerHTML=table;
+}
+
+// FD Calculator
+function calculateFD(){
+  const P=parseFloat(document.getElementById('fdAmount').value);
+  const rate=parseFloat(document.getElementById('fdRate').value)/100;
+  const months=parseInt(document.getElementById('fdTenure').value);
+  if(isNaN(P) || isNaN(rate) || isNaN(months)){ alert('Fill required fields'); return; }
+
+  let balance=P, table=`<table><tr><th>Month</th><th>Interest</th><th>Balance</th></tr>`;
+  for(let i=1;i<=months;i++){
+    const interest=balance*rate/12;
+    balance+=interest;
+    table+=`<tr><td>${i}</td><td>₹${interest.toFixed(2)}</td><td>₹${balance.toFixed(2)}</td></tr>`;
+  }
+  table+=`</table>`;
+  document.getElementById('fdResult').innerHTML=`<p>FD Maturity: ₹${balance.toFixed(2)}</p>`;
+  document.getElementById('fdBreakdown').innerHTML=table;
+}
+
+// SIP Calculator with frequency
+function calculateSIP(){
+  const M=parseFloat(document.getElementById('sipAmount').value);
+  const rate=parseFloat(document.getElementById('sipRate').value)/100;
+  const months=parseInt(document.getElementById('sipTenure').value);
+  const freq=parseInt(document.getElementById('sipFrequency').value);
+  if(isNaN(M) || isNaN(rate) || isNaN(months)){ alert('Fill required fields'); return; }
+
+  let balance=0, table=`<table><tr><th>Month</th><th>Investment</th><th>Interest</th><th>Balance</th></tr>`;
+  for(let i=1;i<=months;i++){
+    const interest=balance*rate/(12/freq);
+    balance+=M+interest;
+    table+=`<tr><td>${i}</td><td>₹${M.toFixed(2)}</td><td>₹${interest.toFixed(2)}</td><td>₹${balance.toFixed(2)}</td></tr>`;
+  }
+  table+=`</table>`;
+  document.getElementById('sipResult').innerHTML=`<p>SIP Maturity: ₹${balance.toFixed(2)}</p>`;
+  document.getElementById('sipBreakdown').innerHTML=table;
+}
+
+// PPF Calculator with partial withdrawal checkbox
+function calculatePPF(){
+  const P=parseFloat(document.getElementById('ppfAmount').value);
+  const rate=parseFloat(document.getElementById('ppfRate').value)/100;
+  const N=parseInt(document.getElementById('ppfTenure').value);
+  const allowPartial=document.getElementById('ppfPartial').checked;
+  if(isNaN(P) || isNaN(rate) || isNaN(N)){ alert('Fill all fields'); return; }
+
+  let balance=0, table=`<table><tr><th>Year</th><th>Contribution</th><th>Interest</th><th>Balance</th></tr>`;
+  for(let i=1;i<=N;i++){
+    const interest=balance*rate;
+    balance+=P+interest;
+    if(allowPartial && i===Math.floor(N/2)) balance-=P*0.25; // example: 25% partial withdrawal mid-term
+    table+=`<tr><td>${i}</td><td>₹${P.toFixed(2)}</td><td>₹${interest.toFixed(2)}</td><td>₹${balance.toFixed(2)}</td></tr>`;
+  }
+  table+=`</table>`;
+  document.getElementById('ppfResult').innerHTML=`<p>PPF Maturity: ₹${balance.toFixed(2)}</p>`;
+  document.getElementById('ppfBreakdown').innerHTML=table;
+}
+
+// GST Calculator with slabs
+function calculateGST(){
+  const amount = parseFloat(document.getElementById('gstAmount').value);
+  const gstRate = parseFloat(document.getElementById('gstRate').value);
+  if(isNaN(amount) || isNaN(gstRate)){ alert('Fill required fields'); return; }
+
+  const gstAmount = amount * gstRate / 100;
+  const totalAmount = amount + gstAmount;
+
+  document.getElementById('gstResult').innerHTML = `
+    <p>Base Amount: ₹${amount.toFixed(2)}</p>
+    <p>GST (${gstRate}%): ₹${gstAmount.toFixed(2)}</p>
+    <p><b>Total Amount: ₹${totalAmount.toFixed(2)}</b></p>
+  `;
+}
+
+// Default charges for EMI (optional)
+document.addEventListener("DOMContentLoaded", function(){
+  document.getElementById('processPercent').value = 2.95;
+  document.getElementById('stamp').value = 100;
+});
+</script>
+
+</body>
+</html>
